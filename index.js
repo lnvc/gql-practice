@@ -1,7 +1,10 @@
 const { ApolloServer, gql } = require('apollo-server');
 
 const RickAndMortyAPI = require('./src/datasources/rick-and-morty-api');
-
+const TodosAPI = require('./src/db/todos-api');
+const pool = require('./src/db/todos-db');
+// sequelize
+// const { createStore } = require('./utils');
 
 const typeDefs = gql`
 type Todo {
@@ -55,32 +58,31 @@ let todos = [
 
 const resolvers = {
   Query: {
-    todos: () => todos,
+    todos: (_, __, { dataSources }) => dataSources.todosAPI.getAllTodos(),
     getCharacters: (_, __, { dataSources }) => {
       return dataSources.rickAndMortyAPI.getCharacters();
     }
   },
   Mutation: {
-    addTodo: (_, { name }) => {
+    addTodo: (_, { name }, { dataSources }) => {
       if (name && name.length) {
-        const newTodo = {
-          id: todos.length + 1,
-          name,
-          checked: false,
-        };
-        todos = [...todos, newTodo];
-        console.log(todos);
-        return todos;
+        return dataSources.todosAPI.createTodo({ name });
       }
     }
   },
 };
+
+// sequelize
+// const store = createStore();
+// raw sql
+const store = pool;
 
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   dataSources: () => ({
     rickAndMortyAPI: new RickAndMortyAPI(),
+    todosAPI: new TodosAPI({ store }),
   }),
 });
 

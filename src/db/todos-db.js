@@ -30,21 +30,40 @@ const pool = new Pool({
   port: process.env.PORT,
 });
 
-pool.query('SELECT NOW()', (err, res) => {
-  console.log(err, res);
-  pool.end();
-});
+// pool.query('SELECT NOW()', (err, res) => {
+//   console.log(err, res);
+//   pool.end();
+// });
 
-const client = new Client({
-  user: process.env.USER,
-  host: process.env.HOST,
-  database: process.env.DATABASE,
-  password: process.env.PASSWORD,
-  port: process.env.PORT,
-});
-client.connect();
+try {
+  pool.query(`
+  CREATE TABLE IF NOT EXISTS todos (
+    id serial primary key,
+    name varchar(255),
+    checked bool
+  );`, (err, res) => {
+    console.log(err, res);
+  });
+  // pool.query(`SELECT * FROM todos;`, (err, res) => {
+  //   console.log(err, res);
+  //   pool.end();
+  // });
+} catch (err) {
+  console.error(err);
+}
 
-client.query('SELECT NOW()', (err, res) => {
-  console.log(err, res);
-  client.end();
-});
+module.exports = pool;
+
+// const client = new Client({
+//   user: process.env.USER,
+//   host: process.env.HOST,
+//   database: process.env.DATABASE,
+//   password: process.env.PASSWORD,
+//   port: process.env.PORT,
+// });
+// client.connect();
+
+// client.query('SELECT NOW()', (err, res) => {
+//   console.log(err, res);
+//   client.end();
+// });
