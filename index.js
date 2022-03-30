@@ -7,6 +7,11 @@ const pool = require('./src/db/todos-db');
 // const { createStore } = require('./utils');
 
 const typeDefs = gql`
+type Status {
+  code: Int
+  message: String
+}
+
 type Todo {
   id: Int!
   name: String
@@ -39,22 +44,11 @@ type Query {
 }
 
 type Mutation {
-  addTodo(name: String): [Todo]
+  addTodo(name: String): Status
+  deleteTodo(id: String): Status
+  checkOrUncheck(id: String): Status
 }
 `;
-
-let todos = [
-  {
-    id: 1,
-    name: 'angkas aliased imports intellisense',
-    checked: true,
-  },
-  {
-    id: 2,
-    name: 'gql + hasura',
-    checked: false,
-  },
-];
 
 const resolvers = {
   Query: {
@@ -68,7 +62,17 @@ const resolvers = {
       if (name && name.length) {
         return dataSources.todosAPI.createTodo({ name });
       }
-    }
+    },
+    deleteTodo: (_, { id }, { dataSources }) => {
+      if (id && id.length) {
+        return dataSources.todosAPI.deleteTodo({ id });
+      }
+    },
+    checkOrUncheck: (_, { id }, { dataSources }) => {
+      if (id && id.length) {
+        return dataSources.todosAPI.checkOrUncheck({ id });
+      }
+    },
   },
 };
 

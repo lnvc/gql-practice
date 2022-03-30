@@ -26,17 +26,60 @@ class TodosAPI extends DataSource {
         (name, checked)
         VALUES ('${name}', FALSE);
       `);
-      const todo = await this.store.query(`
-        SELECT *
-        FROM todos
-        WHERE id = (
-          SELECT MAX(id) FROM todos
-        );
-      `)
-      return todo.rows;
+      return {
+        code: 200,
+        message: 'success',
+      };
     } catch (err) {
       console.error(err);
-      return 'error';
+      return {
+        code: 500,
+        message: 'error',
+      };
+    }
+  }
+
+  async deleteTodo({ id }) {
+    try {
+      await this.store.query(`
+        DELETE FROM todos
+        WHERE id = ${id}
+      `);
+
+      const todos = await this.store.query(`
+        SELECT * FROM todos;
+      `);
+      return {
+        code: 200,
+        message: 'success',
+      };
+    } catch (err) {
+      console.error(err);
+      return {
+        code: 500,
+        message: 'error',
+      };
+    }
+  }
+
+  async checkOrUncheck({ id }) {
+    try {
+      await this.store.query(`
+        UPDATE todos
+        SET checked = NOT checked
+        WHERE id = ${id};
+      `);
+
+      return {
+        code: 200,
+        message: 'success',
+      };
+    } catch (err) {
+      console.error(err);
+      return {
+        code: 500,
+        message: 'error',
+      };
     }
   }
 
@@ -44,7 +87,8 @@ class TodosAPI extends DataSource {
     try {
       const todos = await this.store.query(`
         SELECT *
-        FROM todos;
+        FROM todos
+        ORDER BY id;
       `);
       return todos.rows;
     } catch (err) {
